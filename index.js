@@ -6,7 +6,7 @@ module.exports = class OauthClientWrapper{
     this.client_id = opt.client_id
     this.client_secrect = opt.client_secrect
     this.redirect_uri = opt.redirect_uri
-    this.cache_client = opt.cache_client || false
+    this.cache_client = opt.cache_client || true
     this.genericClient = new OAuth2Client(
       this.client_id,
       this.client_secrect,
@@ -83,7 +83,7 @@ module.exports = class OauthClientWrapper{
   async testToken(oauthClient, uid){
     try{
       const newToken = await oauthClient.getAccessToken()
-      if(this.cache_client && newToken && newToken.token &&  !this.clientCache[uid]) this.clientCache[uid] = oauthClient
+      if(this.cache_client && newToken?.token && !this.clientCache[uid]) this.clientCache[uid] = oauthClient
       return newToken.token
     }catch(e){
       if(e?.response?.data){
