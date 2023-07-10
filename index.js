@@ -2,7 +2,13 @@
 const { v5: uuidv5 } = require('uuid')
 const { OAuth2Client } = require("google-auth-library")
 module.exports = class OauthClientWrapper{
-  constructor(opt){
+  constructor(opt = {}){
+    this.log = {
+      info: this.logInfo,
+      error: this.logError,
+      debug: this.logInfo
+    }
+    if(opt.logger) this.log = opts.logger
     this.client_id = opt.client_id
     this.client_secrect = opt.client_secrect
     this.redirect_uri = opt.redirect_uri
@@ -22,6 +28,12 @@ module.exports = class OauthClientWrapper{
     }
     this.clientCache = {}
   }
+  logInfo (msg){
+    console.log(msg)
+  }
+  logError (msg){
+    console.log(msg)
+  }
   async getAccess(uid, refreshToken){
     try{
       let accessToken
@@ -37,7 +49,7 @@ module.exports = class OauthClientWrapper{
     try{
       if(this.clientCache[uid]) return await this.testToken(this.clientCache[uid], uid)
     }catch(e){
-      console.error(e)
+      this.log.error(e)
     }
   }
   async getClient(){
@@ -51,7 +63,7 @@ module.exports = class OauthClientWrapper{
     try{
       return await this.genericClient.getToken(code)
     }catch(e){
-      console.error(e)
+      this.log.error(e)
     }
   }
   async getUid(tokens){
@@ -59,14 +71,14 @@ module.exports = class OauthClientWrapper{
       const tokenInfo = await this.genericClient.getTokenInfo(tokens.access_token)
       return await uuidv5(tokenInfo.sub, uuidv5.URL)
     }catch(e){
-      console.error(e)
+      this.log.error(e)
     }
   }
   async getUrl(){
     try{
       return await this.genericClient.generateAuthUrl(this.oAuthOptions)
     }catch(e){
-      console.error(e)
+      this.log.error(e)
     }
   }
   async newClient(uid, refreshToken){
@@ -77,7 +89,7 @@ module.exports = class OauthClientWrapper{
       })
       return await this.testToken(oauthClient, uid)
     }catch(e){
-      console.error(e)
+      this.log.error(e)
     }
   }
   async testToken(oauthClient, uid){
@@ -87,10 +99,10 @@ module.exports = class OauthClientWrapper{
       return newToken.token
     }catch(e){
       if(e?.response?.data){
-        console.error('Google auth error: '+e.response.data.error_description)
+        this.log.error('Google auth error: '+e.response.data.error_description)
         if(e.response.data.error == 'invalid_grant') return ({error: 1})
       }else{
-        console.error(e.stack)
+        this.log.error(e)
       }
     }
   }
