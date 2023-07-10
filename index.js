@@ -8,7 +8,7 @@ module.exports = class OauthClientWrapper{
       error: this.logError,
       debug: this.logInfo
     }
-    if(opt.logger) this.log = opts.logger
+    if(opt.logger) this.log = opt.logger
     this.client_id = opt.client_id
     this.client_secrect = opt.client_secrect
     this.redirect_uri = opt.redirect_uri
